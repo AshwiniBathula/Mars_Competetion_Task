@@ -77,26 +77,57 @@ namespace MarsFramework.Pages
         public void RemoveServiceDetails()
         {
             Global.GlobalDefinitions.ExcelLib.PopulateInCollection(Global.Base.ExcelPath, "ListingManagement");
+            Global.GlobalDefinitions.wait(2000);
             ManageListing.Click();
             Base.test.Log(LogStatus.Info, "Starting removing Service");
             Global.GlobalDefinitions.wait(2000);
-             
-            for (int i = 0; i < Title.Count;)
+            //Console.WriteLine("title countis:" + Title.Count);
+            int flag = 0;
+
+            if (NoListing.Displayed)
             {
-                if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
+                Global.Base.test.Log(LogStatus.Info, "There are no services to remove");
+            }
+            else
+            {
+                for (int i = 0; i < Title.Count;)
                 {
-                    Console.WriteLine("i value:" + i);
-                    WebDriverWait wait = new WebDriverWait(Global.GlobalDefinitions.driver, TimeSpan.FromSeconds(5));
-                    wait.Until(ExpectedConditions.ElementToBeClickable((Remove[i])));
-                    Remove[i].Click();
-                    ModalYesButton.Click();
-                    Global.GlobalDefinitions.wait(2000);
-                    i = 0;
+                    if (flag == Title.Count)
+                        break;
+                    else if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
+                    {
+                        Console.WriteLine("i value:" + i);
+                        WebDriverWait wait = new WebDriverWait(Global.GlobalDefinitions.driver, TimeSpan.FromSeconds(10));
+                        wait.Until(ExpectedConditions.ElementToBeClickable((Remove[i])));
+                        Remove[i].Click();
+                        ModalYesButton.Click();
+                        Global.GlobalDefinitions.wait(2000);
+                        i = 0;
+                        flag++;
+                    }
+                    else
+                        i++;
                 }
-                else
-                {
-                    i++;
-                }
+            }
+        }
+
+        public void RemoveAllServices()
+        {
+            Global.GlobalDefinitions.ExcelLib.PopulateInCollection(Global.Base.ExcelPath, "ListingManagement");
+            Global.GlobalDefinitions.wait(2000);
+            ManageListing.Click();
+            Base.test.Log(LogStatus.Info, "Starting removing Service");
+            Global.GlobalDefinitions.wait(2000);
+            Console.WriteLine("remove countis:" + Remove.Count);
+
+            foreach(IWebElement ele in Remove)
+            {
+                //Console.WriteLine("i value:" + i);
+                //WebDriverWait wait = new WebDriverWait(Global.GlobalDefinitions.driver, TimeSpan.FromSeconds(10));
+                //wait.Until(ExpectedConditions.ElementToBeClickable((Remove[i])));
+                ele.Click();
+                ModalYesButton.Click();
+                Global.GlobalDefinitions.wait(2000);
             }
         }
     }
