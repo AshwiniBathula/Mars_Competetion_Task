@@ -38,9 +38,12 @@ namespace MarsFramework
                 Global.GlobalDefinitions.wait(5000);
                 try
                 {
-                    string Expected = "ListingManagement";
-                    Console.WriteLine(Global.GlobalDefinitions.driver.Title);
-                    Assert.AreEqual(Expected, Global.GlobalDefinitions.driver.Title);
+                    string Expected = "Manage Listings";
+                    
+                    WebDriverWait wait = new WebDriverWait(Global.GlobalDefinitions.driver, TimeSpan.FromSeconds(10));
+                    wait.Until(ExpectedConditions.ElementExists((By.XPath("//h2[contains(text(),'Manage Listings')]"))));
+
+                    Assert.AreEqual(Expected, Global.GlobalDefinitions.driver.FindElement(By.XPath("//h2[contains(text(),'Manage Listings')]")).Text);
                     Global.Base.test.Log(LogStatus.Pass, "Service is added successfully");
                 }
                 catch (Exception e) {
