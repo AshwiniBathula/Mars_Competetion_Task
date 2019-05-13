@@ -95,27 +95,60 @@ namespace MarsFramework
             [Test]
             public void Validate_Remove_Service()
             {
-                test = extent.StartTest("Starting Remove Service test");
-                ListingManagement service = new ListingManagement();
-
-                service.RemoveServiceDetails();
-                Global.GlobalDefinitions.wait(2000);
-                IList<IWebElement> Title = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[3]"));
-                IList<IWebElement> Category = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[2]"));
-
                 try
                 {
-                    for(int i = 0; i < Title.Count; i++)
+                test = extent.StartTest("Starting Remove Service test");
+                ListingManagement service = new ListingManagement();
+                service.RemoveServiceDetails();
+                Global.GlobalDefinitions.wait(2000);
+                IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
+                    if (NoListings.Displayed)
                     {
-                        if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
+                        Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
+                        Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
+                    }
+                    else
+                    {
+                        Global.GlobalDefinitions.wait(2000);
+                        IList<IWebElement> Title = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[3]"));
+                        IList<IWebElement> Category = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[2]"));
+                        Global.Base.test.Log(LogStatus.Info, "Total languages are:" + Title.Count);
+                        bool recordFound = true;
+
+                        for (int i = 0; i < Title.Count; i++)
                         {
-                            Global.Base.test.Log(LogStatus.Fail, "Service is not removed");
+                            if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
+                                recordFound = true;
+                            else
+                                recordFound = false;
                         }
+                        Assert.True(recordFound == false);
+                        Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
                     }
                 }
                 catch (Exception e)
                 {
-                    Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
+                    Global.Base.test.Log(LogStatus.Fail, "Service is not removed"+e);
+                }
+            }
+            [Test]
+            public void Validate_Remove_AllServices()
+            {
+                test = extent.StartTest("Starting Remove Service test");
+                ListingManagement service = new ListingManagement();
+
+                try
+                {
+                    IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
+                    if (NoListings.Displayed)
+                    {
+                        Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
+                        Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Global.Base.test.Log(LogStatus.Fail, "Services are not removed" +e);
                 }
             }
         }
