@@ -1,6 +1,7 @@
-﻿using MarsFramework.Pages;
+using MarsFramework.Pages;
 using NUnit.Framework;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using RelevantCodes.ExtentReports;
 using System;
 using System.Collections.Generic;
@@ -34,8 +35,9 @@ namespace MarsFramework
                 test = extent.StartTest("Starting Add Service test");
                 ServiceListing service = new ServiceListing();
 
-                service.AddService();
+                string PageTitle = service.AddService();
                 Global.GlobalDefinitions.wait(5000);
+
                 try
                 {
                     string Expected = "Manage Listings";
@@ -56,28 +58,34 @@ namespace MarsFramework
             {
                 test = extent.StartTest("Starting View Service test");
                 ListingManagement service = new ListingManagement();
-
                 service.ViewServiceDetails();
                 Global.GlobalDefinitions.wait(3000);
 
                 try
                 {
-                    string Expected = "Service Detail";
-                    Assert.AreEqual(Expected, Global.GlobalDefinitions.driver.Title);
-                    Global.Base.test.Log(LogStatus.Pass, "Service is displayed successfully");
+                        string Expected = "ListingManagement";
+                        Assert.AreEqual(Expected, Global.GlobalDefinitions.driver.Title);
+                        Global.Base.test.Log(LogStatus.Pass, "Service is Viewed successfully");
                 }
                 catch (Exception e)
                 {
-                    Global.Base.test.Log(LogStatus.Fail, "Service is not displayed" + e);
+                    IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
+                    if (NoListings.Displayed)
+                    {
+                        Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
+                        Global.Base.test.Log(LogStatus.Pass, "You do not have any service listings to View");
+                    }
+                    else
+                        Global.Base.test.Log(LogStatus.Fail, "Service is not Edited" + e);
                 }
-            }
+            }    
+        
 
             [Test]
             public void Validate_Edit_Service()
             {
                 test = extent.StartTest("Starting edit Service test");
                 ListingManagement service = new ListingManagement();
-
                 service.EditServiceDetails();
                 Global.GlobalDefinitions.wait(2000);
 
@@ -89,53 +97,62 @@ namespace MarsFramework
                 }
                 catch (Exception e)
                 {
-                    Global.Base.test.Log(LogStatus.Fail, "Service is not Edited" + e);
+                    
+                    IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
+                    if (NoListings.Displayed)
+                    {
+                        Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
+                        Global.Base.test.Log(LogStatus.Pass, "You do not have any service listings to Edit");
+                    }
+                    else
+                        Global.Base.test.Log(LogStatus.Fail, "Service is not Edited" + e);
                 }
             }
+
             [Test]
             public void Validate_Remove_Service()
             {
-                try
-                {
+                
                 test = extent.StartTest("Starting Remove Service test");
                 ListingManagement service = new ListingManagement();
                 service.RemoveServiceDetails();
                 Global.GlobalDefinitions.wait(2000);
-                IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
-                    if (NoListings.Displayed)
-                    {
-                        Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
-                        Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
-                    }
-                    else
-                    {
-                        Global.GlobalDefinitions.wait(2000);
-                        IList<IWebElement> Title = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[3]"));
-                        IList<IWebElement> Category = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[2]"));
-                        Global.Base.test.Log(LogStatus.Info, "Total languages are:" + Title.Count);
-                        bool recordFound = true;
-
-                        for (int i = 0; i < Title.Count; i++)
-                        {
-                            if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
-                                recordFound = true;
-                            else
-                                recordFound = false;
-                        }
-                        Assert.True(recordFound == false);
-                        Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
-                    }
-                }
-                catch (Exception e)
+                try
                 {
-                    Global.Base.test.Log(LogStatus.Fail, "Service is not removed"+e);
+                    IList<IWebElement> Title = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[3]"));
+                    IList<IWebElement> Category = Global.GlobalDefinitions.driver.FindElements(By.XPath("//table//tbody//tr//td[2]"));
+                    bool recordFound = true;
+
+                    for (int i = 0; i < Title.Count; i++)
+                    {
+                        if ((Global.GlobalDefinitions.ExcelLib.ReadData(2, "Title") == Title[i].Text) && (Global.GlobalDefinitions.ExcelLib.ReadData(2, "Category") == Category[i].Text))
+                            recordFound = true;
+                        else
+                            recordFound = false;
+                    }
+                    Assert.True(recordFound == false);
+                    Global.Base.test.Log(LogStatus.Pass, "Service is removed successfully");
                 }
+                    catch (Exception e)
+                    {
+                        IWebElement NoListings = Global.GlobalDefinitions.driver.FindElement(By.XPath("//h3[contains(text(),'You do not have any service listings!')]"));
+                        if (NoListings.Displayed)
+                        {
+                            Assert.AreEqual(NoListings.Text, "You do not have any service listings!");
+                            Global.Base.test.Log(LogStatus.Pass, "You do not have any service listings to Remove");
+                        }
+                        else
+                            Global.Base.test.Log(LogStatus.Fail, "Service is not removed" + e);
+                    } 
             }
+
             [Test]
             public void Validate_Remove_AllServices()
             {
                 test = extent.StartTest("Starting Remove Service test");
                 ListingManagement service = new ListingManagement();
+                service.RemoveAllServices();
+                Global.GlobalDefinitions.wait(5000);
 
                 try
                 {
